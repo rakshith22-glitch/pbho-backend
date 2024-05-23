@@ -27,6 +27,11 @@ connection.once('open', () => {
 app.use('/api/users', userRoutes);
 app.use('/api/round-robin', roundRobinRoutes);
 
+// Root route to display "Hello"
+app.get('/', (req, res) => {
+    res.send('Hello');
+});
+
 // Start Server
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
