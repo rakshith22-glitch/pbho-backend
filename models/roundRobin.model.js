@@ -20,7 +20,8 @@ const roundRobinSchema = new mongoose.Schema({
     maxRating: { type: Number },
     submitScoresToDUPR: { type: Boolean, required: false },
     clubID: { type: String },
-    link: { type: String, required: false }
+    link: { type: String, required: false },
+    cost: {type: Number, required: false }
 }, { timestamps: true });
 
 // Add a method to check if the Round Robin is full

@@ -21,7 +21,8 @@ export const createRoundRobin = async (req, res) => {
         minRating,
         maxRating,
         submitScoresToDUPR,
-        clubID
+        clubID,
+        cost
     } = req.body;
 
     const roundRobin = new RoundRobin({
@@ -42,7 +43,8 @@ export const createRoundRobin = async (req, res) => {
         minRating,
         maxRating,
         submitScoresToDUPR,
-        clubID
+        clubID,
+        cost
     });
 
     await roundRobin.save();
@@ -112,6 +114,7 @@ export const updateRoundRobin = async (req, res) => {
             maxRating,
             submitScoresToDUPR,
             clubID,
+            cost,
         } = req.body;
 
         const roundRobin = await RoundRobin.findById(id);
@@ -139,6 +142,7 @@ export const updateRoundRobin = async (req, res) => {
         roundRobin.maxRating = maxRating;
         roundRobin.submitScoresToDUPR = submitScoresToDUPR;
         roundRobin.clubID = clubID;
+        roundRobin.cost = cost;
 
         const updatedRoundRobin = await roundRobin.save();
 
