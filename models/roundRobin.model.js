@@ -13,6 +13,7 @@ const roundRobinSchema = new mongoose.Schema({
     maxRounds: { type: Number, required: true },
     scoringOptions: { type: String, required: false },
     players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    waitlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     isRotatingPartners: { type: Boolean, required: true },
     isRecurring: { type: Boolean, required: false },
     requireDUPR: { type: Boolean, required: false },
@@ -28,6 +29,9 @@ const roundRobinSchema = new mongoose.Schema({
 roundRobinSchema.methods.isFull = function () {
     return this.players.length >= this.maxPlayers;
 };
-
+// Method to check if a user is already registered or on the waitlist
+roundRobinSchema.methods.isRegisteredOrWaitlisted = function (userId) {
+    return this.players.includes(userId) || this.waitlist.includes(userId);
+};
 const RoundRobin = mongoose.model('RoundRobin', roundRobinSchema);
 export default RoundRobin;

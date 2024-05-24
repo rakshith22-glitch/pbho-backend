@@ -169,3 +169,47 @@ export const deleteRoundRobin = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+export const joinRoundRobin = async (req, res) => {
+    try {
+        const roundRobin = await RoundRobin.findById(req.params.id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+        
+        if (roundRobin.players.length >= roundRobin.maxPlayers) {
+            return res.status(400).json({ message: 'Round Robin is full. Joining waitlist.' });
+        }
+        
+        if (roundRobin.players.includes(req.user._id)) {
+            return res.status(400).json({ message: 'Already signed up' });
+        }
+
+        roundRobin.players.push(req.user._id);
+        await roundRobin.save();
+        res.json({ message: 'Successfully signed up for the Round Robin' });
+    } catch (error) {
+        console.error('Error signing up for round robin:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const joinWaitlist = async (req, res) => {
+    try {
+        const roundRobin = await RoundRobin.findById(req.params.id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+
+        if (roundRobin.waitlist.includes(req.user._id)) {
+            return res.status(400).json({ message: 'Already on waitlist' });
+        }
+
+        roundRobin.waitlist.push(req.user._id);
+        await roundRobin.save();
+        res.json({ message: 'Added to the waitlist successfully' });
+    } catch (error) {
+        console.error('Error adding to waitlist:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
