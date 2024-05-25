@@ -15,7 +15,7 @@ router.route('/:id/join')
 router.route('/:id/waitlist')
     .post(protect, joinWaitlist); // Join the waitlist for a specific round robin
 
-router.post('/:id/add-user', protect, admin, addUserToRoundRobin);
-router.post('/:id/remove-user', protect, admin, removeUserFromRoundRobin);
+router.post('/:id/add-user', protect, addUserToRoundRobin);
+router.post('/:id/remove-user', protect, removeUserFromRoundRobin);
 
 export default router;
