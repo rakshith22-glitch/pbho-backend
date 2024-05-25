@@ -100,10 +100,16 @@ export const getUserById = async (req, res) => {
 };
 
 export const getAllUsers = async (req, res) => {
+    // Check if the user is an admin
+    if (req.user && req.user.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Only admins can perform this action." });
+    }
+
     try {
         const users = await User.find().select('-password');
         res.json(users);
     } catch (error) {
+        console.error('Error fetching users:', error);
         res.status(500).json({ message: "Error fetching users" });
     }
 };
