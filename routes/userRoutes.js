@@ -11,7 +11,6 @@ router.get('/profile', protect, getUserProfile);
 router.put('/become-member', protect, becomeMember);
 router.put('/cancel-membership', protect, cancelMembership);
 router.route('/:userId').get(getUserById);
-// UserRoutes.js
 router.get('/allusers', getAllUsers);
 
 
