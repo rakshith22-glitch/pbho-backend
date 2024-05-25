@@ -1,6 +1,6 @@
 
 import express from 'express';
-import { registerUser, becomeMember, cancelMembership, getUserProfile, loginUser, getUserById,getAllUsers } from '../controllers/userController.js';
+import { registerUser, becomeMember, cancelMembership, getUserProfile, loginUser, getUserById, getAllUsers } from '../controllers/userController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -12,7 +12,7 @@ router.put('/become-member', protect, becomeMember);
 router.put('/cancel-membership', protect, cancelMembership);
 router.route('/:userId').get(getUserById);
 // UserRoutes.js
-router.get('/users', protect, getAllUsers);
+router.get('/allusers', protect, getAllUsers);
 
 
 export default router;
