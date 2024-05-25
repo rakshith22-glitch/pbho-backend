@@ -1,6 +1,9 @@
 // backend/routes/roundRobinRoutes.js
 import express from 'express';
-import { getRoundRobins, createRoundRobin, updateRoundRobin, deleteRoundRobin, getRoundRobin ,joinRoundRobin, joinWaitlist} from '../controllers/roundRobinController.js';
+import { getRoundRobins, createRoundRobin, updateRoundRobin,
+     deleteRoundRobin, addUserToRoundRobin, removeUserFromRoundRobin,
+        getRoundRobin ,joinRoundRobin, joinWaitlist} 
+        from '../controllers/roundRobinController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
