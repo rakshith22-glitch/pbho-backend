@@ -213,3 +213,55 @@ export const joinWaitlist = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+// RoundRobinController.js
+export const addUserToRoundRobin = async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    try {
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+
+        // Check if user is already a participant
+        if (roundRobin.players.includes(userId)) {
+            return res.status(400).json({ message: 'User already added' });
+        }
+
+        // Add user to round robin
+        roundRobin.players.push(userId);
+        await roundRobin.save();
+        res.status(201).json({ message: 'User added successfully', roundRobin });
+    } catch (error) {
+        console.error('Error adding user to round robin:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// RoundRobinController.js
+export const removeUserFromRoundRobin = async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    try {
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+
+        // Check if user is not a participant
+        if (!roundRobin.players.includes(userId)) {
+            return res.status(400).json({ message: 'User not found in round robin' });
+        }
+
+        // Remove user from round robin
+        roundRobin.players = roundRobin.players.filter(player => player.toString() !== userId);
+        await roundRobin.save();
+        res.status(200).json({ message: 'User removed successfully', roundRobin });
+    } catch (error) {
+        console.error('Error removing user from round robin:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

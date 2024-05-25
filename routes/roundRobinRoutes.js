@@ -15,9 +15,7 @@ router.route('/:id/join')
 router.route('/:id/waitlist')
     .post(protect, joinWaitlist); // Join the waitlist for a specific round robin
 
-// Route to get all round robins a user is part of
-// router.route('/user-roundrobins/:userId')
-//     .get(protect, getUserRoundRobins); // Get all round robins associated with a user
-
+router.post('/:id/add-user', protect, admin, addUserToRoundRobin);
+router.post('/:id/remove-user', protect, admin, removeUserFromRoundRobin);
 
 export default router;
