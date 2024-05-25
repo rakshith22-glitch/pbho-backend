@@ -12,7 +12,7 @@ router.put('/become-member', protect, becomeMember);
 router.put('/cancel-membership', protect, cancelMembership);
 router.route('/:userId').get(getUserById);
 // UserRoutes.js
-router.get('/users', protect, admin, getAllUsers);
+router.get('/users', protect, getAllUsers);
 
 
 export default router;
