@@ -233,7 +233,7 @@ export const addUserToRoundRobin = async (req, res) => {
         // Add user to round robin
         roundRobin.players.push(userId);
         await roundRobin.save();
-        res.status(201).json({ message: 'User added successfully', roundRobin });
+        res.status(200).json({ message: 'User added successfully', roundRobin });
     } catch (error) {
         console.error('Error adding user to round robin:', error);
         res.status(500).json({ message: 'Internal server error' });
