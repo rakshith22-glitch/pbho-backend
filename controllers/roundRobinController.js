@@ -265,3 +265,55 @@ export const removeUserFromRoundRobin = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+// POST: Add a join request to the round robin
+exports.addJoinRequest = async (req, res) => {
+    const { userId } = req.body; // ID of the user sending the join request
+    const { id } = req.params; // ID of the round robin tournament
+
+    try {
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).send({ message: "Round Robin not found." });
+        }
+
+        // Check if the user is already a participant or has already requested
+        if (roundRobin.participants.includes(userId) || roundRobin.joinRequests.includes(userId)) {
+            return res.status(400).send({ message: "User is already a participant or has already requested to join." });
+        }
+
+        // Add the user's ID to the joinRequests array
+        roundRobin.joinRequests.push(userId);
+        await roundRobin.save();
+
+        res.status(200).json(roundRobin);
+    } catch (error) {
+        res.status(500).send({ message: "Error adding join request.", error: error.message });
+    }
+};
+
+// POST: Approve a join request
+exports.approveJoinRequest = async (req, res) => {
+    const { userId } = req.body; // ID of the user being approved
+    const { id } = req.params; // ID of the round robin tournament
+
+    try {
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).send({ message: "Round Robin not found." });
+        }
+
+        // Remove user from joinRequests and add to participants
+        const index = roundRobin.joinRequests.indexOf(userId);
+        if (index > -1) {
+            roundRobin.joinRequests.splice(index, 1);
+            roundRobin.participants.push(userId);
+            await roundRobin.save();
+            res.status(200).json(roundRobin);
+        } else {
+            res.status(404).send({ message: "Join request not found." });
+        }
+    } catch (error) {
+        res.status(500).send({ message: "Error approving join request.", error: error.message });
+    }
+};

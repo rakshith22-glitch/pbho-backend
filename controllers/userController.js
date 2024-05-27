@@ -108,3 +108,25 @@ export const getAllUsers = async (req, res) => {
         res.status(500).json({ message: "Error fetching all users", error: error.message });
     }
 };
+
+export const searchUsers = async (req, res) => {
+    const { term } = req.query; // Extract the search term from the query parameters
+    if (!term) {
+        return res.status(400).json({ message: "Search term is required" });
+    }
+
+    try {
+        // Perform a case-insensitive search on the 'name' and 'email' fields
+        const users = await User.find({
+            $or: [
+                { name: { $regex: term, $options: 'i' } },
+                { email: { $regex: term, $options: 'i' } }
+            ]
+        }, '_id name email').exec(); // Only return specific fields to protect user privacy
+
+        res.json(users);
+    } catch (error) {
+        console.error('Error searching users:', error);
+        res.status(500).json({ message: "Error fetching users", error: error.message });
+    }
+};

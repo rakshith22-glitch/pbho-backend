@@ -14,6 +14,7 @@ const roundRobinSchema = new mongoose.Schema({
     scoringOptions: { type: String, required: false },
     players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     waitlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    joinRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     isRotatingPartners: { type: Boolean, required: true },
     isRecurring: { type: Boolean, required: false },
     requireDUPR: { type: Boolean, required: false },
