@@ -267,7 +267,7 @@ export const removeUserFromRoundRobin = async (req, res) => {
 };
 
 // POST: Add a join request to the round robin
-exports.addJoinRequest = async (req, res) => {
+export const addJoinRequest = async (req, res) => {
     const { userId } = req.body; // ID of the user sending the join request
     const { id } = req.params; // ID of the round robin tournament
 
@@ -293,7 +293,7 @@ exports.addJoinRequest = async (req, res) => {
 };
 
 // POST: Approve a join request
-exports.approveJoinRequest = async (req, res) => {
+export const approveJoinRequest = async (req, res) => {
     const { userId } = req.body; // ID of the user being approved
     const { id } = req.params; // ID of the round robin tournament
 
