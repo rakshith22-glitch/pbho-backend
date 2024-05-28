@@ -278,7 +278,7 @@ export const addJoinRequest = async (req, res) => {
         }
 
         // Check if the user is already a participant or has already requested
-        if (roundRobin.participants.includes(userId) || roundRobin.joinRequests.includes(userId)) {
+        if (roundRobin.players.includes(userId) || roundRobin.joinRequests.includes(userId)) {
             return res.status(400).send({ message: "User is already a participant or has already requested to join." });
         }
 
@@ -303,17 +303,33 @@ export const approveJoinRequest = async (req, res) => {
             return res.status(404).send({ message: "Round Robin not found." });
         }
 
-        // Remove user from joinRequests and add to participants
-        const index = roundRobin.joinRequests.indexOf(userId);
-        if (index > -1) {
-            roundRobin.joinRequests.splice(index, 1);
-            roundRobin.participants.push(userId);
-            await roundRobin.save();
-            res.status(200).json(roundRobin);
-        } else {
-            res.status(404).send({ message: "Join request not found." });
+        // Check if the user is in joinRequests
+        const requestIndex = roundRobin.joinRequests.indexOf(userId);
+        if (requestIndex === -1) {
+            return res.status(404).send({ message: "Join request not found." });
         }
+
+        // Check if the user is already a participant
+        if (roundRobin.players.includes(userId)) {
+            return res.status(400).send({ message: "User is already a participant." });
+        }
+
+        // Remove user from joinRequests and add to participants
+        roundRobin.joinRequests.splice(requestIndex, 1);
+        roundRobin.players.push(userId);
+
+        await roundRobin.save();
+
+        // Fetch updated user details for response
+        const updatedPlayerDetails = await getUserDetails(userId);
+
+        res.status(200).json({
+            message: "User approved and added to participants.",
+            roundRobin,
+            updatedPlayerDetails,
+        });
     } catch (error) {
         res.status(500).send({ message: "Error approving join request.", error: error.message });
     }
 };
+

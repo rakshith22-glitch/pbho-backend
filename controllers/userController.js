@@ -110,8 +110,8 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const searchUsers = async (req, res) => {
-    const { term } = req.query; // Extract the search term from the query parameters
-    if (!term) {
+    const {search}  = req.params.search; // Extract the search term from the query parameters
+    if (!search) {
         return res.status(400).json({ message: "Search term is required" });
     }
 
@@ -119,8 +119,8 @@ export const searchUsers = async (req, res) => {
         // Perform a case-insensitive search on the 'name' and 'email' fields
         const users = await User.find({
             $or: [
-                { name: { $regex: term, $options: 'i' } },
-                { email: { $regex: term, $options: 'i' } }
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
             ]
         }, '_id name email').exec(); // Only return specific fields to protect user privacy
 

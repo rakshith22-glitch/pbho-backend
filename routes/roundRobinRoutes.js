@@ -21,7 +21,7 @@ router.route('/:id/waitlist')
 router.post('/:id/add-user', protect, addUserToRoundRobin);
 router.post('/:id/remove-user', protect, removeUserFromRoundRobin);
 
-router.post('/roundrobins/:id/join-request', addJoinRequest);
-router.post('/roundrobins/:id/approve-request', approveJoinRequest);
+router.post('/:id/join-request', addJoinRequest);
+router.post('/:id/approve-request', approveJoinRequest);
 
 export default router;
