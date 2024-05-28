@@ -1,6 +1,6 @@
 // backend/controllers/roundRobinController.js
-import RoundRobin from '../models/roundRobin.model.js'
-
+import RoundRobin from '../models/RoundRobin.js';
+import { getUserDetails } from '../services/userService.js';
 
 export const createRoundRobin = async (req, res) => {
     const {
@@ -14,7 +14,6 @@ export const createRoundRobin = async (req, res) => {
         maxPlayers,
         maxRounds,
         scoringOptions,
-        courts,
         isRotatingPartners,
         link,
         requireDUPR,
@@ -22,7 +21,8 @@ export const createRoundRobin = async (req, res) => {
         maxRating,
         submitScoresToDUPR,
         clubID,
-        cost
+        cost,
+        format
     } = req.body;
 
     const roundRobin = new RoundRobin({
@@ -36,7 +36,6 @@ export const createRoundRobin = async (req, res) => {
         maxPlayers,
         maxRounds,
         scoringOptions,
-        courts,
         isRotatingPartners,
         link,
         requireDUPR,
@@ -44,7 +43,8 @@ export const createRoundRobin = async (req, res) => {
         maxRating,
         submitScoresToDUPR,
         clubID,
-        cost
+        cost,
+        format
     });
 
     await roundRobin.save();
@@ -56,39 +56,16 @@ export const getRoundRobins = async (req, res) => {
     res.json(roundRobins);
 };
 
-export const signUpForRoundRobin = async (req, res) => {
-    const roundRobin = await RoundRobin.findById(req.params.id);
-    if (roundRobin) {
-        if (!roundRobin.players.includes(req._id)) {
-            roundRobin.players.push(req._id);
-            await roundRobin.save();
-            res.json({ message: 'Successfully signed up for the Round Robin' });
-        } else {
-            res.status(400).json({ message: 'Already signed up' });
-        }
-    } else {
-        res.status(404).json({ message: 'Round Robin not found' });
-    }
-};
-
-export const getUserRegistrations = async (req, res) => {
+export const getRoundRobin = async (req, res) => {
     try {
-      const userId = req.params.userId;
-      const registrations = await Registration.find({ user: userId }); // Adjust based on how your data schema is set up
-  
-      res.json(registrations);
-    } catch (error) {
-      console.error('Failed to fetch registrations:', error);
-      res.status(500).json({ message: "Error fetching user registrations" });
-    }
-  };
-
-  export const getRoundRobin = async (req, res) => {
-    const roundRobin = await RoundRobin.findById(req.params.id);
-    if (!roundRobin) {
-        res.status(404).json({ message: 'Round Robin not found' });
-    } else {
+        const roundRobin = await RoundRobin.findById(req.params.id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
         res.json(roundRobin);
+    } catch (error) {
+        console.error('Error fetching round robin:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -106,7 +83,6 @@ export const updateRoundRobin = async (req, res) => {
             maxPlayers,
             maxRounds,
             scoringOptions,
-            courts,
             isRotatingPartners,
             link,
             requireDUPR,
@@ -115,6 +91,7 @@ export const updateRoundRobin = async (req, res) => {
             submitScoresToDUPR,
             clubID,
             cost,
+            format
         } = req.body;
 
         const roundRobin = await RoundRobin.findById(id);
@@ -134,7 +111,6 @@ export const updateRoundRobin = async (req, res) => {
         roundRobin.maxPlayers = maxPlayers;
         roundRobin.maxRounds = maxRounds;
         roundRobin.scoringOptions = scoringOptions;
-        roundRobin.courts = courts;
         roundRobin.isRotatingPartners = isRotatingPartners;
         roundRobin.link = link;
         roundRobin.requireDUPR = requireDUPR;
@@ -143,6 +119,7 @@ export const updateRoundRobin = async (req, res) => {
         roundRobin.submitScoresToDUPR = submitScoresToDUPR;
         roundRobin.clubID = clubID;
         roundRobin.cost = cost;
+        roundRobin.format = format;
 
         const updatedRoundRobin = await roundRobin.save();
 
@@ -170,19 +147,19 @@ export const deleteRoundRobin = async (req, res) => {
     }
 };
 
-export const joinRoundRobin = async (req, res) => {
+export const signUpForRoundRobin = async (req, res) => {
     try {
         const roundRobin = await RoundRobin.findById(req.params.id);
         if (!roundRobin) {
             return res.status(404).json({ message: 'Round Robin not found' });
         }
         
-        if (roundRobin.players.length >= roundRobin.maxPlayers) {
+        if (roundRobin.isFull()) {
             return res.status(400).json({ message: 'Round Robin is full. Joining waitlist.' });
         }
         
-        if (roundRobin.players.includes(req.user._id)) {
-            return res.status(400).json({ message: 'Already signed up' });
+        if (roundRobin.isRegisteredOrWaitlisted(req.user._id)) {
+            return res.status(400).json({ message: 'Already signed up or on waitlist' });
         }
 
         roundRobin.players.push(req.user._id);
@@ -201,8 +178,8 @@ export const joinWaitlist = async (req, res) => {
             return res.status(404).json({ message: 'Round Robin not found' });
         }
 
-        if (roundRobin.waitlist.includes(req.user._id)) {
-            return res.status(400).json({ message: 'Already on waitlist' });
+        if (roundRobin.isRegisteredOrWaitlisted(req.user._id)) {
+            return res.status(400).json({ message: 'Already signed up or on waitlist' });
         }
 
         roundRobin.waitlist.push(req.user._id);
@@ -214,59 +191,6 @@ export const joinWaitlist = async (req, res) => {
     }
 };
 
-// RoundRobinController.js
-export const addUserToRoundRobin = async (req, res) => {
-    const { id } = req.params;
-    const { userId } = req.body;
-
-    try {
-        const roundRobin = await RoundRobin.findById(id);
-        if (!roundRobin) {
-            return res.status(404).json({ message: 'Round Robin not found' });
-        }
-
-        // Check if user is already a participant
-        if (roundRobin.players.includes(userId)) {
-            return res.status(400).json({ message: 'User already added' });
-        }
-
-        // Add user to round robin
-        roundRobin.players.push(userId);
-        await roundRobin.save();
-        res.status(200).json({ message: 'User added successfully', roundRobin });
-    } catch (error) {
-        console.error('Error adding user to round robin:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-};
-
-// RoundRobinController.js
-export const removeUserFromRoundRobin = async (req, res) => {
-    const { id } = req.params;
-    const { userId } = req.body;
-
-    try {
-        const roundRobin = await RoundRobin.findById(id);
-        if (!roundRobin) {
-            return res.status(404).json({ message: 'Round Robin not found' });
-        }
-
-        // Check if user is not a participant
-        if (!roundRobin.players.includes(userId)) {
-            return res.status(400).json({ message: 'User not found in round robin' });
-        }
-
-        // Remove user from round robin
-        roundRobin.players = roundRobin.players.filter(player => player.toString() !== userId);
-        await roundRobin.save();
-        res.status(200).json({ message: 'User removed successfully', roundRobin });
-    } catch (error) {
-        console.error('Error removing user from round robin:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-};
-
-// POST: Add a join request to the round robin
 export const addJoinRequest = async (req, res) => {
     const { userId } = req.body; // ID of the user sending the join request
     const { id } = req.params; // ID of the round robin tournament
@@ -292,7 +216,6 @@ export const addJoinRequest = async (req, res) => {
     }
 };
 
-// POST: Approve a join request
 export const approveJoinRequest = async (req, res) => {
     const { userId } = req.body; // ID of the user being approved
     const { id } = req.params; // ID of the round robin tournament
@@ -333,3 +256,52 @@ export const approveJoinRequest = async (req, res) => {
     }
 };
 
+export const addUserToRoundRobin = async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    try {
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+
+        // Check if user is already a participant
+        if (roundRobin.players.includes(userId)) {
+            return res.status(400).json({ message: 'User already added' });
+        }
+
+        // Add user to round robin
+        roundRobin.players.push(userId);
+        await roundRobin.save();
+        res.status(200).json({ message: 'User added successfully', roundRobin });
+    } catch (error) {
+        console.error('Error adding user to round robin:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const removeUserFromRoundRobin = async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    try {
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+
+        // Check if user is not a participant
+        if (!roundRobin.players.includes(userId)) {
+            return res.status(400).json({ message: 'User not found in round robin' });
+        }
+
+        // Remove user from round robin
+        roundRobin.players = roundRobin.players.filter(player => player.toString() !== userId);
+        await roundRobin.save();
+        res.status(200).json({ message: 'User removed successfully', roundRobin });
+    } catch (error) {
+        console.error('Error removing user from round robin:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
