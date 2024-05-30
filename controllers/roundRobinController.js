@@ -20,10 +20,11 @@ export const createRoundRobin = async (req, res) => {
         requireDUPR,
         minRating,
         maxRating,
+        format,
         submitScoresToDUPR,
         clubID,
         cost,
-        format,
+       
     } = req.body;
 
     const roundRobin = new RoundRobin({
@@ -41,12 +42,13 @@ export const createRoundRobin = async (req, res) => {
         isRotatingPartners,
         link,
         requireDUPR,
+        format,
         minRating,
         maxRating,
         submitScoresToDUPR,
         clubID,
         cost,
-        format,
+       
     });
 
     await roundRobin.save();
@@ -111,13 +113,14 @@ export const updateRoundRobin = async (req, res) => {
             courts,
             isRotatingPartners,
             link,
+            format,
             requireDUPR,
             minRating,
             maxRating,
             submitScoresToDUPR,
             clubID,
             cost,
-            format,,
+            
         } = req.body;
 
         const roundRobin = await RoundRobin.findById(id);
