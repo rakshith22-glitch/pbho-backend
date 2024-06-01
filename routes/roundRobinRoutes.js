@@ -2,7 +2,8 @@
 import express from 'express';
 import { getRoundRobins, createRoundRobin, updateRoundRobin,
      deleteRoundRobin, addUserToRoundRobin, removeUserFromRoundRobin,
-        getRoundRobin ,joinRoundRobin, joinWaitlist, addJoinRequest, approveJoinRequest} 
+        getRoundRobin ,joinRoundRobin, joinWaitlist, addJoinRequest,
+        approveJoinRequest, updateScores} 
         from '../controllers/roundRobinController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
@@ -23,5 +24,7 @@ router.post('/:id/remove-user', protect, removeUserFromRoundRobin);
 
 router.post('/:id/join-request', addJoinRequest);
 router.post('/:id/approve-request', approveJoinRequest);
+
+router.post('/:id/scores', updateScores);
 
 export default router;

@@ -339,3 +339,23 @@ export const approveJoinRequest = async (req, res) => {
         res.status(500).send({ message: "Error approving join request.", error: error.message });
     }
 };
+
+
+
+export const updateScores = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { scores } = req.body;
+
+        const roundRobin = await RoundRobin.findById(id);
+        if (!roundRobin) {
+            return res.status(404).json({ message: 'Round Robin not found' });
+        }
+
+        roundRobin.scores = scores;
+        await roundRobin.save();
+        res.json(roundRobin);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

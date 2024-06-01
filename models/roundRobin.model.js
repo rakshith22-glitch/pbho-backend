@@ -24,7 +24,14 @@ const roundRobinSchema = new mongoose.Schema({
     clubID: { type: String },
     link: { type: String, required: false },
     cost: {type: Number, required: false },
-    format: {type: String, required: false }
+    format: {type: String, required: false },
+    scores: [{
+        round: { type: Number, required: true },
+        team1: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        team2: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        score1: { type: Number, required: true },
+        score2: { type: Number, required: true },
+    }],
 }, { timestamps: true });
 
 // Add a method to check if the Round Robin is full
